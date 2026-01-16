@@ -8,7 +8,11 @@ CREATE TABLE IF NOT EXISTS possible_objects (
     identifier VARCHAR(255) NOT NULL,
     type VARCHAR(255) NOT NULL,
     version_number INTEGER NOT NULL DEFAULT 1,
-    bin_identifier VARCHAR(255)
+    bin_identifier VARCHAR(255),
+    CONSTRAINT fk_possible_objects_parent
+        FOREIGN KEY (parent_id)
+        REFERENCES possible_objects (id)
+        ON DELETE SET NULL  -- Options: CASCADE, SET NULL, or RESTRICT
 );
 
 CREATE INDEX IF NOT EXISTS idx_possible_objects_id ON possible_objects(id);
