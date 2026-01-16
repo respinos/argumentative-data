@@ -17,15 +17,17 @@ public class PossibleObject {
     private String identifier;
     private String type;
     private Integer versionNumber = 1;
+    private String binIdentifier;
 
     public PossibleObject() {}
 
-    public PossibleObject(Integer id, Integer parentId, String identifier, String type, Integer versionNumber) {
+    public PossibleObject(Integer id, Integer parentId, String identifier, String type, Integer versionNumber, String binIdentifier) {
         this.id = id;
         this.parentId = parentId;
         this.identifier = identifier;
         this.type = type;
         this.versionNumber = versionNumber;
+        this.binIdentifier = binIdentifier;
     }
 
     public Integer getId() { return id; }
@@ -42,4 +44,7 @@ public class PossibleObject {
 
     public Integer getVersionNumber() { return versionNumber; }
     public void setVersionNumber(Integer versionNumber) { this.versionNumber = versionNumber; }
+
+    public String getBinIdentifier() { return binIdentifier; }
+    public void setBinIdentifier(String binIdentifier) { this.binIdentifier = binIdentifier; }
 }
