@@ -5,5 +5,6 @@ import java.util.List;
 
 public interface PossibleObjectRepository extends CrudRepository<PossibleObject, Integer> {
     List<PossibleObject> findByParentId(Integer parentId);
-    // Additional query methods can be defined here if needed
+    // Fetch all ObjectFiles for a PossibleObject
+    List<ObjectFile> findObjectFilesById(Integer id);
 }
