@@ -20,6 +20,7 @@
         <th>Type</th>
         <th>Version Number</th>
         <th>Bin Identifier</th>
+        <th>Object File Size</th>
     </tr>
     </thead>
     <tbody>
@@ -30,6 +31,7 @@
         <td th:text="${obj.type}"></td>
         <td th:text="${obj.versionNumber}"></td>
         <td th:text="${obj.binIdentifier}"></td>
+        <td th:text="${objectFileSizes[obj.id]}"></td>
     </tr>
     </tbody>
 </table>
