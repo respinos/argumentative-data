@@ -2,8 +2,6 @@ package org.example.argumentativedata;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
-import org.springframework.data.relational.core.mapping.Column;
-import org.springframework.lang.Nullable;
 import java.time.LocalDateTime;
 
 @Table("object_files")
@@ -17,15 +15,12 @@ public class ObjectFile {
     private byte[] digest;
     private Integer versionNumber;
     private LocalDateTime lastFixityCheck;
-    @Column("possible_object_id")
-    @Nullable
-    private Integer possibleObjectId;
 
     // No-argument constructor (for Spring Data JDBC)
     public ObjectFile() {}
 
     // All-arguments constructor (for manual instantiation)
-    public ObjectFile(Integer id, String identifier, String fileFormat, String fileFunction, Integer size, byte[] digest, Integer versionNumber, LocalDateTime lastFixityCheck, Integer possibleObjectId) {
+    public ObjectFile(Integer id, String identifier, String fileFormat, String fileFunction, Integer size, byte[] digest, Integer versionNumber, LocalDateTime lastFixityCheck) {
         this.id = id;
         this.identifier = identifier;
         this.fileFormat = fileFormat;
@@ -34,7 +29,6 @@ public class ObjectFile {
         this.digest = digest;
         this.versionNumber = versionNumber;
         this.lastFixityCheck = lastFixityCheck;
-        this.possibleObjectId = possibleObjectId;
     }
 
     // Getters and setters
@@ -54,6 +48,4 @@ public class ObjectFile {
     public void setVersionNumber(Integer versionNumber) { this.versionNumber = versionNumber; }
     public LocalDateTime getLastFixityCheck() { return lastFixityCheck; }
     public void setLastFixityCheck(LocalDateTime lastFixityCheck) { this.lastFixityCheck = lastFixityCheck; }
-    public Integer getPossibleObjectId() { return possibleObjectId; }
-    public void setPossibleObjectId(Integer possibleObjectId) { this.possibleObjectId = possibleObjectId; }
 }

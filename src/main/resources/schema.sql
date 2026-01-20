@@ -42,9 +42,10 @@ CREATE TABLE object_files (
      digest BYTEA NOT NULL,
      version_number INTEGER NOT NULL,
      last_fixity_check TIMESTAMP NOT NULL,
-     possible_object_id INTEGER,
-     FOREIGN KEY(possible_object_id) REFERENCES possible_objects (id) ON DELETE CASCADE
+     possible_objects_key INTEGER NULL,
+     possible_objects_index INTEGER,
+     FOREIGN KEY(possible_objects_key) REFERENCES possible_objects (id) ON DELETE CASCADE
 );
-CREATE INDEX ix_catalog_object_file_intellectual_object_id ON object_files (possible_object_id);
+CREATE INDEX ix_catalog_object_file_intellectual_object_id ON object_files (possible_objects_key);
 CREATE INDEX ix_catalog_object_file_file_function ON object_files (file_function);
 CREATE INDEX ix_catalog_object_file_file_format ON object_files (file_format);

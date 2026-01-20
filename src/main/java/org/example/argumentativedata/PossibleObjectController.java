@@ -14,12 +14,10 @@ import java.util.stream.StreamSupport;
 @Controller
 public class PossibleObjectController {
     private final PossibleObjectRepository repository;
-    private final ObjectFileRepository objectFileRepository;
 
     @Autowired
-    public PossibleObjectController(PossibleObjectRepository repository, ObjectFileRepository objectFileRepository) {
+    public PossibleObjectController(PossibleObjectRepository repository) {
         this.repository = repository;
-        this.objectFileRepository = objectFileRepository;
     }
 
     @GetMapping("/possible-object")
@@ -27,7 +25,9 @@ public class PossibleObjectController {
         Optional<PossibleObject> possibleObject = repository.findById(id);
         model.addAttribute("possibleObject", possibleObject.orElse(null));
 
-        var possibleObjectFileSize = objectFileRepository.sumSizeByPossibleObjectId(possibleObject.get().getId());
+        var possibleObjectFileSize = possibleObject.isPresent() && possibleObject.get().getObjectFiles() != null
+            ? possibleObject.get().getObjectFiles().stream().mapToLong(ObjectFile::getSize).sum()
+            : 0L;
         model.addAttribute("possibleObjectFileSize", possibleObjectFileSize);
 
         List<PossibleObject> childPossibleObjects = possibleObject.isPresent()
@@ -40,7 +40,7 @@ public class PossibleObjectController {
         Map<Integer, Long> childObjectFileSizes = childPossibleObjects.stream()
                 .collect(Collectors.toMap(
                         PossibleObject::getId,
-                        obj -> objectFileRepository.sumSizeIncludingDescendants(obj.getId())
+                        obj -> obj.getObjectFiles() == null ? 0L : obj.getObjectFiles().stream().mapToLong(ObjectFile::getSize).sum()
                 ));
 
         model.addAttribute("childObjectFileSizes", childObjectFileSizes);

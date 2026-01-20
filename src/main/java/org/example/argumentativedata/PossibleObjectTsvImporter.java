@@ -15,18 +15,16 @@ import java.util.Map;
 @Component
 public class PossibleObjectTsvImporter implements CommandLineRunner {
     private final PossibleObjectRepository repository;
-    private final ObjectFileRepository fileRepository;
 
     @Autowired
-    public PossibleObjectTsvImporter(PossibleObjectRepository repository, ObjectFileRepository fileRepository) {
+    public PossibleObjectTsvImporter(PossibleObjectRepository repository) {
         this.repository = repository;
-        this.fileRepository = fileRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
         String filePath = "tmp/output.tsv";
-        Map<String, Integer> identifierToId = new HashMap<>();
+        Map<String, PossibleObject> identifierToObject = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String header = reader.readLine(); // skip header
             String line;
@@ -43,15 +41,29 @@ public class PossibleObjectTsvImporter implements CommandLineRunner {
                     versionNumber = Integer.parseInt(revisionNumberStr);
                 } catch (NumberFormatException ignored) {}
                 Integer parentId = null;
-                if (parentIdentifiers != null && !parentIdentifiers.isBlank()) {
-                    parentId = identifierToId.get(parentIdentifiers);
-                }
-                PossibleObject obj = new PossibleObject(null, parentId, identifier, type, versionNumber, binIdentifier);
-                obj = repository.save(obj);
-                identifierToId.put(identifier, obj.getId());
+                // Do NOT set parentId yet, as parent may not have id assigned
+                PossibleObject obj = new PossibleObject(null, null, identifier, type, versionNumber, binIdentifier, new java.util.ArrayList<>());
+                identifierToObject.put(identifier, obj);
             }
         } catch (IOException e) {
             System.err.println("Error reading TSV file: " + e.getMessage());
+        }
+
+        // Second pass: set parentId now that all objects are created
+        for (PossibleObject obj : identifierToObject.values()) {
+            String parentIdentifiers = null;
+            for (Map.Entry<String, PossibleObject> entry : identifierToObject.entrySet()) {
+                if (entry.getValue() == obj) {
+                    parentIdentifiers = entry.getKey();
+                    break;
+                }
+            }
+            if (parentIdentifiers != null) {
+                PossibleObject parentObj = identifierToObject.get(parentIdentifiers);
+                if (parentObj != null && parentObj != obj) {
+                    obj.setParentId(parentObj.getId());
+                }
+            }
         }
 
         filePath = "tmp/files.tsv";
@@ -60,8 +72,8 @@ public class PossibleObjectTsvImporter implements CommandLineRunner {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] fields = line.split("\t", -1);
-                if (fields.length < 5) continue;
-                String object_dentifier = fields[0];
+                if (fields.length < 8) continue;
+                String object_identifier = fields[0];
                 String identifier = fields[1];
                 String fileFormat = fields[2];
                 String fileFunction = fields[3];
@@ -91,12 +103,20 @@ public class PossibleObjectTsvImporter implements CommandLineRunner {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS");
                     lastFixityCheck = LocalDateTime.parse(lastFixityCheckStr, formatter);
                 }
-                Integer possibleObjectId = identifierToId.get(object_dentifier);
-                ObjectFile objFile = new ObjectFile(null, identifier, fileFormat, fileFunction, size, digest, versionNumber, lastFixityCheck, possibleObjectId);
-                objFile = fileRepository.save(objFile);
+                PossibleObject obj = identifierToObject.get(object_identifier);
+                if (obj != null) {
+                    ObjectFile objFile = new ObjectFile(null, identifier, fileFormat, fileFunction, size, digest, versionNumber, lastFixityCheck);
+                    obj.getObjectFiles().add(objFile);
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading TSV file: " + e.getMessage());
+        }
+        // Save all aggregates with their files (and parentId set)
+        for (PossibleObject obj : identifierToObject.values()) {
+            System.out.println("-- saving %s".formatted(obj.getIdentifier()));
+            obj.getObjectFiles().forEach(file -> System.out.println("  - file: %s".formatted(file.getIdentifier())));
+            repository.save(obj);
         }
     }
 }

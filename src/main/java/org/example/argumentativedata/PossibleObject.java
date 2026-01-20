@@ -4,6 +4,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.lang.Nullable;
+import org.springframework.data.relational.core.mapping.MappedCollection;
+
+import java.util.List;
 
 @Table("possible_objects")
 public class PossibleObject {
@@ -19,15 +22,19 @@ public class PossibleObject {
     private Integer versionNumber = 1;
     private String binIdentifier;
 
+    @MappedCollection(idColumn = "possible_objects_key", keyColumn = "possible_objects_index")
+    private List<ObjectFile> objectFiles;
+
     public PossibleObject() {}
 
-    public PossibleObject(Integer id, Integer parentId, String identifier, String type, Integer versionNumber, String binIdentifier) {
+    public PossibleObject(Integer id, Integer parentId, String identifier, String type, Integer versionNumber, String binIdentifier, List<ObjectFile> objectFiles) {
         this.id = id;
         this.parentId = parentId;
         this.identifier = identifier;
         this.type = type;
         this.versionNumber = versionNumber;
         this.binIdentifier = binIdentifier;
+        this.objectFiles = objectFiles;
     }
 
     public Integer getId() { return id; }
@@ -47,4 +54,7 @@ public class PossibleObject {
 
     public String getBinIdentifier() { return binIdentifier; }
     public void setBinIdentifier(String binIdentifier) { this.binIdentifier = binIdentifier; }
+
+    public List<ObjectFile> getObjectFiles() { return objectFiles; }
+    public void setObjectFiles(List<ObjectFile> objectFiles) { this.objectFiles = objectFiles; }
 }

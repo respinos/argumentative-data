@@ -17,12 +17,10 @@ import java.util.stream.StreamSupport;
 @Controller
 public class CurrentPossibleObjectController {
     private final CurrentPossibleObjectRepository repository;
-    private final ObjectFileRepository objectFileRepository;
 
     @Autowired
-    public CurrentPossibleObjectController(CurrentPossibleObjectRepository repository, ObjectFileRepository objectFileRepository) {
+    public CurrentPossibleObjectController(CurrentPossibleObjectRepository repository) {
         this.repository = repository;
-        this.objectFileRepository = objectFileRepository;
     }
 
     @GetMapping("/current-possible-objects")
@@ -42,7 +40,7 @@ public class CurrentPossibleObjectController {
         Map<Integer, Long> objectFileSizes = pageContent.stream()
                 .collect(Collectors.toMap(
                         PossibleObject::getId,
-                        obj -> objectFileRepository.sumSizeIncludingDescendants(obj.getId())
+                        obj -> obj.getObjectFiles() == null ? 0L : obj.getObjectFiles().stream().mapToLong(ObjectFile::getSize).sum()
                 ));
         model.addAttribute("page", pageResult);
         model.addAttribute("objectFileSizes", objectFileSizes);
